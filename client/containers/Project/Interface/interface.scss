@@ -181,6 +181,9 @@
 .right-content {
   min-height: 5rem;
   background: #fff;
+  .ant-table {
+    word-break: break-word;
+  }
   .caseContainer {
     table {
       border-radius: 4px;
