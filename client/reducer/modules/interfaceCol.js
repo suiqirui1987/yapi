@@ -1,6 +1,7 @@
 import axios from 'axios';
 // Actions
 const FETCH_INTERFACE_COL_LIST = 'yapi/interfaceCol/FETCH_INTERFACE_COL_LIST';
+const FETCH_INTERFACE_COL_LIST_NEW = 'yapi/interfaceCol/FETCH_INTERFACE_COL_LIST_NEW';
 const FETCH_CASE_DATA = 'yapi/interfaceCol/FETCH_CASE_DATA';
 const FETCH_CASE_LIST = 'yapi/interfaceCol/FETCH_CASE_LIST';
 const SET_COL_DATA = 'yapi/interfaceCol/SET_COL_DATA';
@@ -22,10 +23,15 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case FETCH_INTERFACE_COL_LIST: {
-      console.log({"FETCH_INTERFACE_COL_LIST":action.payload.data.data});
       return {
         ...state,
         interfaceColList: action.payload.data.data
+      };
+    }
+    case FETCH_INTERFACE_COL_LIST_NEW: {
+      return {
+        ...state,
+        interfaceColListNew: action.payload.data.data
       };
     }
     case FETCH_CASE_DATA: {
@@ -70,6 +76,28 @@ export async function fetchInterfaceColList(projectId, axiosOption = {}) {
     const result = await axios.get('/api/col/list?project_id=' + projectId, axiosOption);
     return {
       type: FETCH_INTERFACE_COL_LIST,
+      payload: result
+    };
+  } catch (e) {
+    if (axios.isCancel(e)) {
+      return {
+        type: '',
+        payload: e
+      };
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function fetchInterfaceColListNew(params, axiosOption = {}) {
+  try {
+    const result = await axios.get('/api/col/list_new', {
+      params,
+      ...axiosOption
+    });
+    return {
+      type: FETCH_INTERFACE_COL_LIST_NEW,
       payload: result
     };
   } catch (e) {

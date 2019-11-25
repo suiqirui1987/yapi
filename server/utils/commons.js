@@ -451,7 +451,63 @@ exports.translateDataToTree=(data,mynodeid)=> {
   return result;
 }
 
+exports.getColNew = async (project_id, col_id) => {
+  const caseInst = yapi.getInst(interfaceCaseModel);
+  const colInst = yapi.getInst(interfaceColModel);
+  const interfaceInst = yapi.getInst(interfaceModel);
+  let result = await colInst.list(project_id);
+  result = result.sort((a, b) => {
+    return a.index - b.index;
+  });
 
+  // 找到 col_id 的所有祖先元素id
+  const shouldGetCaseCols = [];
+  if (col_id) {
+    col_id = Number(col_id);
+    let pid;
+    let current = result.find(v => v._id === col_id);
+    if (current) {
+      pid = current.parent_id;
+    }
+    while (pid >= 0) {
+      shouldGetCaseCols.push(pid);
+      current = result.find(v => v._id === pid)
+      if (current) {
+        pid = current.parent_id;
+      } else {
+        pid = -1;
+      }
+    }
+  }
+
+  console.log('shouldGetCaseCols', shouldGetCaseCols);
+
+
+  for (let i = 0; i < result.length; i++) {
+    if (!shouldGetCaseCols.includes(result[i]._id)) {
+      continue
+    }
+    result[i] = result[i].toObject();
+    result[i].parent_id=(typeof result[i].parent_id) == 'undefined'?-1: result[i].parent_id;
+    let caseList = await caseInst.list(result[i]._id);
+
+    for(let j=0; j< caseList.length; j++){
+      let item = caseList[j].toObject();
+      let interfaceData = await interfaceInst.getBaseinfo(item.interface_id);
+      item.path = interfaceData.path;
+      caseList[j] = item;
+    }
+
+    caseList = caseList.sort((a, b) => {
+      return a.index - b.index;
+    });
+    if(caseList&&caseList.length>0){
+      result[i].caseList = caseList;
+    }
+  }
+  result = this.translateDataToTree(result);
+  return result;
+}
 
 exports.validateParams = (schema2, params) => {
   const flag = schema2.closeRemoveAdditional;

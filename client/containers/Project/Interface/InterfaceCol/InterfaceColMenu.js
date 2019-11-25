@@ -9,6 +9,7 @@ import {
   fetchCaseList,
   fetchInterfaceCaseList,
   fetchInterfaceColList,
+  fetchInterfaceColListNew,
   setColData
 } from '../../../../reducer/modules/interfaceCol';
 import {fetchProjectList} from '../../../../reducer/modules/project';
@@ -49,6 +50,7 @@ const ColModalForm = Form.create()(props => {
   state => {
     return {
       interfaceColList: state.interfaceCol.interfaceColList,
+      interfaceColListNew: state.interfaceCol.interfaceColListNew,
       currCase: state.interfaceCol.currCase,
       isRander: state.interfaceCol.isRander,
       currCaseId: state.interfaceCol.currCaseId,
@@ -60,6 +62,7 @@ const ColModalForm = Form.create()(props => {
   },
   {
     fetchInterfaceColList,
+    fetchInterfaceColListNew,
     fetchInterfaceCaseList,
     fetchCaseData,
     // fetchInterfaceListMenu,
@@ -73,7 +76,9 @@ export default class InterfaceColMenu extends Component {
   static propTypes = {
     match: PropTypes.object,
     interfaceColList: PropTypes.array,
+    interfaceColListNew: PropTypes.array,
     fetchInterfaceColList: PropTypes.func,
+    fetchInterfaceColListNew: PropTypes.func,
     fetchInterfaceCaseList: PropTypes.func,
     // fetchInterfaceListMenu: PropTypes.func,
     fetchCaseList: PropTypes.func,
@@ -108,22 +113,21 @@ export default class InterfaceColMenu extends Component {
     currentCol: {}
   };
 
-  constructor(props) {
-    super(props);
-    //console.log("constructor");
-
-
-  }
-
-  componentWillMount() {
+  componentDidMount() {
     this.getList();
   }
 
   componentWillReceiveProps(nextProps) {
     // console.log({"this.props":this.props})
-    if (this.props.interfaceColList !== nextProps.interfaceColList) {
+    // if (this.props.interfaceColList !== nextProps.interfaceColList) {
+    //   this.setState({
+    //     list: nextProps.interfaceColList
+    //   });
+    // }
+
+    if (this.props.interfaceColListNew !== nextProps.interfaceColListNew) {
       this.setState({
-        list: nextProps.interfaceColList
+        list: nextProps.interfaceColListNew
       });
     }
     const { pathname } = this.props.location;
@@ -183,9 +187,8 @@ export default class InterfaceColMenu extends Component {
   }
 
   async getList() {
-    let r = await this.props.fetchInterfaceColList(this.props.match.params.id);
-    this.setState({
-      list: r.payload.data.data
+    let r = await this.props.fetchInterfaceColListNew({
+      project_id: this.props.match.params.id
     });
     return r;
   }

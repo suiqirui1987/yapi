@@ -60,8 +60,6 @@ let routerConfig = {
       path: 'get_mygroup',
       method: 'get'
     },
-
-    
     {
       action: 'list',
       path: 'list',
@@ -447,6 +445,11 @@ let routerConfig = {
     {
       action: 'list',
       path: 'list',
+      method: 'get'
+    },
+    {
+      action: 'listNew',
+      path: 'list_new',
       method: 'get'
     },
     {

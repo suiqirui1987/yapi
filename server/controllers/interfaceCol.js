@@ -41,8 +41,30 @@ class interfaceColController extends baseController {
     }
   }
 
+  async listNew(ctx) {
+    try {
+      let id = ctx.query.project_id;
+      let project = await this.projectModel.getBaseInfo(id);
+      if (project.project_type === 'private') {
+        if ((await this.checkAuth(project._id, 'project', 'view')) !== true) {
+          return (ctx.body = yapi.commons.resReturn(null, 406, '没有权限'));
+        }
+      }
+      let colId = ctx.query.col_id;
+      let result = await this.getColNew(id,colId);
+      ctx.body = yapi.commons.resReturn(result);
+    } catch (e) {
+      ctx.body = yapi.commons.resReturn(null, 402, e.message);
+    }
+  }
+
   async getCol(project_id,islist,mycatid) {
     let result= yapi.commons.getCol(project_id,islist,mycatid);
+    return result;
+  }
+
+  async getColNew(project_id, colId) {
+    let result= yapi.commons.getColNew(project_id,colId);
     return result;
   }
 
