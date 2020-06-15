@@ -16,8 +16,8 @@ if (!isNode) {
   axios.interceptors.request.use(function (config) {
     // Do something before request is sent
     config.headers = {
-      ...config.headers,
-      'Yapi-User': localStorage.getItem('YAPI_USER') || ''
+      ...config.headers //,
+     // 'Yapi-User': localStorage.getItem('YAPI_USER') || ''
     }
     return config;
   }, function (error) {
