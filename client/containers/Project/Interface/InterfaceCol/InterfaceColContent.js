@@ -382,7 +382,7 @@ class InterfaceColContent extends Component {
         result = e;
       }
       // 
-      if status != "ok" {
+      if(status != "ok"){
           console.log("停止执行");
           break;
       }
