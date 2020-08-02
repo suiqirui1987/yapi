@@ -381,6 +381,10 @@ class InterfaceColContent extends Component {
         status = 'error';
         result = e;
       }
+      // 
+      if status != "ok" {
+          return 'error'
+      }
 
       //result.body = result.data;
       this.reports[curitem._id] = result;
