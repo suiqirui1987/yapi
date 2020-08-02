@@ -383,7 +383,8 @@ class InterfaceColContent extends Component {
       }
       // 
       if status != "ok" {
-          return 'error'
+          console.log("停止执行");
+          break;
       }
 
       //result.body = result.data;
