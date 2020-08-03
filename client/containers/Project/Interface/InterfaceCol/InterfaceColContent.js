@@ -344,6 +344,8 @@ class InterfaceColContent extends Component {
 
 
   executeTests = async () => {
+    var prestatus = '';
+
     for (let i = 0, l = this.state.rows.length, newRows, curitem; i < l; i++) {
       let { rows } = this.state;
 
@@ -367,7 +369,16 @@ class InterfaceColContent extends Component {
       let status = 'error',
         result;
       try {
-        result = await this.handleTest(curitem);
+        if( prestatus == "ok"){
+          result = await this.handleTest(curitem);
+        }else{
+          console.log("停止执行");
+          result = {
+            code:1,
+            params:null,
+            res_body: "停止执行"
+          }
+        }
 
         if (result.code === 400) {
           status = 'error';
@@ -381,11 +392,7 @@ class InterfaceColContent extends Component {
         status = 'error';
         result = e;
       }
-      // 
-      if(status != "ok"){
-          console.log("停止执行");
-          break;
-      }
+  
 
       //result.body = result.data;
       this.reports[curitem._id] = result;
