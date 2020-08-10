@@ -424,7 +424,8 @@ exports.translateDataToTree=(data,mynodeid)=> {
    const interfaceInst = yapi.getInst(interfaceModel);
   let result = await colInst.list(project_id);
   result = result.sort((a, b) => {
-    return a.index - b.index;
+   // return a.index - b.index;
+   return  a.name.localeCompare(b.name) 
   });
 
   for (let i = 0; i < result.length; i++) {
