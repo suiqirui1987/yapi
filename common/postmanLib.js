@@ -126,7 +126,7 @@ async function httpRequestByNode(options) {
       method: options.method,
       url: options.url,
       headers: options.headers,
-      timeout: 20000,
+      timeout: 100000,
       maxRedirects: 0,
       httpsAgent: new https.Agent({
         rejectUnauthorized: false
@@ -143,7 +143,7 @@ async function httpRequestByNode(options) {
     console.log({err});
     if (err.response === undefined) {
       if(err.message==="Network Error"){
-        err.message={"err":err.message,"des":"请参考教程开启chrome 跨域请求：http://crazy-yapi.camdy.cn/doc/documents/chromeCORS.html"}
+        err.message={"err":err.message, "des":"请参考教程开启chrome 跨域请求：http://crazy-yapi.camdy.cn/doc/documents/chromeCORS.html"}
       }
       return handleRes({
         headers: {},
@@ -211,7 +211,7 @@ function sandboxByNode(sandbox = {}, script) {
   script = new vm.Script(script);
   const context = new vm.createContext(sandbox);
   script.runInContext(context, {
-    timeout: 20000
+    timeout: 80000
   });
   return sandbox;
 }
@@ -291,7 +291,7 @@ async function crossRequest(defaultOptions, preScript, afterScript,case_pre_scri
     requestHeader: options.headers || {},
     requestBody: options.data,
     promise: false,
-    storage: await getStorage(taskId)
+    storage: await getStorage(taskId),
   };
   //console.log("context init end!");
   Object.assign(context, commonContext)

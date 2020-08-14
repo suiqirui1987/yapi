@@ -15,18 +15,26 @@ module.exports = function renderToHtml(reports) {
 function createHtml(reports) {
   let mdTemplate = ``;
   let left = ``;
+  let left_left = ``;
   reports.list.map((item, index) => {
-    mdTemplate += baseHtml(index, item.name, item.path, item.status);
+    var dataindex = index;
+    mdTemplate += baseHtml(dataindex, item.name, item.path, item.status);
     mdTemplate += validHtml(item.validRes);
     mdTemplate += requestHtml(item.url, item.headers, item.data);
     mdTemplate += reponseHtml(item.res_header, item.res_body);
-    left += leftHtml(index, item.name, item.code);
+    left += leftHtml(dataindex, item.name, item.code);
     // left += codeHtml(item.code);
   });
-  return createHtml5(left, mdTemplate, reports.message, reports.runTime);
+
+  reports.coldata_list.map((item,index) => {
+    left_left +=  leftleftHtml(index, item.name, item.url);
+  });
+  return createHtml5(left_left, left, mdTemplate, reports.message, reports.runTime);
 }
 
-function createHtml5(left, tp, msg, runTime) {
+
+
+function createHtml5(left_left,left, tp, msg, runTime) {
   let message = ``;
   if (msg.failedNum === 0) {
     message += `<div>一共 <span class="success">${
@@ -55,6 +63,9 @@ function createHtml5(left, tp, msg, runTime) {
       </div>
     </div>
     <div class="g-doc">
+      <div class="menu-left-left">
+        ${left_left}
+      </div>
       <div class="menu-left">
         ${left}
       </div>
@@ -170,6 +181,16 @@ function baseHtml(index, name, path, status) {
     <div class="col-3 case-report-title">Status</div>
     <div class="col-21">${status}</div>
    </div>
+  </div>
+  `;
+
+  return html;
+}
+
+function leftleftHtml(index, name,url) {
+  let html = `
+  <div class="list-content">
+    <a class="list" href="${url}#${index}">${name}</a>
   </div>
   `;
 

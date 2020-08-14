@@ -642,6 +642,7 @@ export default class InterfaceColMenu extends Component {
 
   };
 
+  
   moveCasecallback = (cid)=>{
 
     this.setState({
@@ -801,6 +802,14 @@ export default class InterfaceColMenu extends Component {
             >
               添加集合
             </Button>
+          </Tooltip>
+        </div>
+
+        <div className="interface-filter">
+          <Tooltip placement="bottom" title="自动化测试">
+           
+      
+
           </Tooltip>
         </div>
         <div className="tree-wrapper" style={{ maxHeight: parseInt(document.body.clientHeight) - headHeight + 'px'}}>

@@ -594,6 +594,11 @@ let routerConfig = {
       method: 'get'
     },
     {
+      action: 'runAutoBatchTest',
+      path: 'run_auto_batch_test',
+      method: 'get'
+    },
+    {
       action: 'importData',
       path: 'import_data',
       method: 'post'

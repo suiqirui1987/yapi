@@ -172,10 +172,16 @@ class openController extends baseController {
     });
     return result;
   }
-  async runAutoTest(ctx) {
+  
+  async runcaseItemrun(ctx) {
+    
+  }
+
+  async runAutoBatchTest(ctx) {
     if (!this.$tokenAuth) {
       return (ctx.body = yapi.commons.resReturn(null, 40022, 'token 验证失败'));
     }
+   // console.log("runAutoTest", ctx);
     // console.log(1231312)
     const token = ctx.query.token;
 
@@ -187,7 +193,115 @@ class openController extends baseController {
     let rootid = ctx.params.id;
     let curEnvList = this.handleEvnParams(ctx.params);
 
+    let colData = await yapi.commons.getCol(projectId,false, 0);
+    let colData2 = await yapi.commons.getCol(projectId,false,rootid);
+    let colids=[];
+    colids.push(colData2._id);
+    if(ctx.params.descendants|| ctx.params.descendants==='true') {
+      colids = colids.concat(colData2.descendants);
+    }
+  
+    if (!colData2) {
+      return (ctx.body = yapi.commons.resReturn(null, 40022, 'id值不存在'));
+    }
+    let projectData = await this.projectModel.get(projectId);
+//--------------
+    for(let c=0;c<colids.length;c++){
+      let id=colids[c];
+      let caseList = await yapi.commons.getCaseList(id);
+      if (caseList.errcode !== 0) {
+        ctx.body = caseList;
+      }
+      caseList = caseList.data;
+      for (let i = 0, l = caseList.length; i < l; i++) {
 
+        let item = caseList[i];
+        let curEnvItem = _.find(curEnvList, key => {
+          return key.project_id == item.project_id;
+        });
+        caseList[i].case_env="测试";
+       
+        let result = await this.caseItemrun(caseList[i], curEnvItem, projectData.pre_script,projectData.after_script,records,reports);
+       // console.log("result",result);
+
+
+        if(result.res_body.code != 0){
+          result.code = 1;
+        }
+
+        testList.push(result);
+      }
+    }
+//-----------------------
+    function getMessage(testList) {
+      let successNum = 0,
+        failedNum = 0,
+        len = 0,
+        msg = '';
+      testList.forEach(item => {
+        len++;
+        if (item.code === 0) {
+          successNum++;
+        }
+        else {
+          failedNum++;
+        }
+      });
+      if (failedNum === 0) {
+        msg = `一共 ${len} 测试用例，全部验证通过`;
+      } else {
+        msg = `一共 ${len} 测试用例，${successNum} 个验证通过， ${failedNum} 个未通过。`;
+      }
+
+      return { msg, len, successNum, failedNum };
+    }
+
+    const endTime = new Date().getTime();
+    const executionTime = (endTime - startTime) / 1000;
+
+    var coldata_list = [];
+    colData.map((item,index)=>{
+      var obj={}
+      obj.name = item.name;
+      obj.id = item._id;
+      obj.url = `${ctx.request.origin}/api/open/run_auto_batch_test?id=${obj.id}&token=${token}&mode=${ctx.params.mode}`;
+
+      coldata_list.push(obj);
+    })
+
+  //  console.log({testList});
+    let reportsResult = {
+      message: getMessage(testList),
+      runTime: executionTime + 's',
+      numbs: testList.length,
+      list: testList,
+      coldata_list:coldata_list,
+    };
+
+
+    return (ctx.body = renderToHtml(reportsResult));
+  }
+
+  
+
+
+  async runAutoTest(ctx) {
+    if (!this.$tokenAuth) {
+      return (ctx.body = yapi.commons.resReturn(null, 40022, 'token 验证失败'));
+    }
+   // console.log("runAutoTest", ctx);
+    // console.log(1231312)
+    const token = ctx.query.token;
+
+    const projectId = ctx.params.project_id;
+    const startTime = new Date().getTime();
+    const testList = [];
+    const records = (this.records = {});
+    const reports = (this.reports = {});
+    let rootid = ctx.params.id;
+    let curEnvList = this.handleEvnParams(ctx.params);
+
+    let colData = await yapi.commons.getCol(projectId,false, 0);
     let colData2 = await yapi.commons.getCol(projectId,false,rootid);
     let colids=[];
     colids.push(colData2._id);
@@ -195,7 +309,7 @@ class openController extends baseController {
     if(ctx.params.descendants|| ctx.params.descendants==='true') {
       colids = colids.concat(colData2.descendants);
     }
-   // console.log({colids});
+  
     if (!colData2) {
       return (ctx.body = yapi.commons.resReturn(null, 40022, 'id值不存在'));
     }
@@ -248,12 +362,24 @@ class openController extends baseController {
     const endTime = new Date().getTime();
     const executionTime = (endTime - startTime) / 1000;
 
+    var coldata_list = [];
+    colData.map((item,index)=>{
+      var obj={}
+      obj.name = item.name;
+      obj.id = item._id;
+      obj.url = `${ctx.request.origin}/api/open/run_auto_test?id=${obj.id}&token=${token}&mode=${ctx.params.mode}`;
+
+  
+      coldata_list.push(obj);
+    })
+
   //  console.log({testList});
     let reportsResult = {
       message: getMessage(testList),
       runTime: executionTime + 's',
       numbs: testList.length,
-      list: testList
+      list: testList,
+      coldata_list:coldata_list,
     };
 
     if (ctx.params.email === true && reportsResult.message.failedNum !== 0) {
@@ -290,6 +416,16 @@ class openController extends baseController {
   }
 
   async caseItemrun(caseme, curEnvItem, pre_script,after_script,records,reports) {
+   
+    //console.log("pre_script",pre_script);
+    if(pre_script){
+      pre_script = pre_script.replace(/window\./,"context.");
+    }
+    if(after_script){
+     after_script = after_script.replace(/window\./,"context.");
+    }
+
+
 
     let item = caseme;
     let projectEvn = await this.projectModel.getByEnv(item.project_id);
@@ -300,7 +436,7 @@ class openController extends baseController {
     item.after_script = after_script;
     item.env = projectEvn.env;
     let result;
-    // console.log('item',item.case_env)
+    //console.log('item',item)
     try {
       result = await this.handleTest(item);
     } catch (err) {
@@ -328,6 +464,24 @@ class openController extends baseController {
       uid:caseItemData.uid
     };
 
+    if(caseItemData.pre_script){
+      caseItemData.pre_script = caseItemData.pre_script.replace(/window\.localStorage/g,"context.storage");
+    }
+    if(caseItemData.after_script){
+      caseItemData.after_script = caseItemData.after_script.replace(/window\.localStorage/g,"context.storage");
+    }
+
+    if(caseItemData.case_pre_script){
+      caseItemData.case_pre_script = caseItemData.case_pre_script.replace(/window\.localStorage/g,"context.storage");
+      caseItemData.case_pre_script = caseItemData.case_pre_script.replace(/CondCode\s*!==\s*"0"/g,"CondCode != 0");
+    }
+    if(caseItemData.case_post_script){
+      caseItemData.case_post_script = caseItemData.case_post_script.replace(/window\.localStorage/g,"context.storage");
+      caseItemData.case_post_script = caseItemData.case_post_script.replace(/CondCode\s*!==\s*"0"/g,"CondCode != 0");
+
+    }
+
+  //  console.log(caseItemData);
     try {
       options.taskId = this.getUid();
 
@@ -338,6 +492,9 @@ class openController extends baseController {
       ));
 
       let res = data.res;
+
+      
+
 
       result = Object.assign(result, {
         status: res.status,
