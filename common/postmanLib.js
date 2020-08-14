@@ -291,7 +291,7 @@ async function crossRequest(defaultOptions, preScript, afterScript,case_pre_scri
     requestHeader: options.headers || {},
     requestBody: options.data,
     promise: false,
-    storage: await getStorage(taskId),
+    storage: await getStorage(taskId)
   };
   //console.log("context init end!");
   Object.assign(context, commonContext)
