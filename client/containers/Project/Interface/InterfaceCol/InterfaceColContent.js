@@ -123,7 +123,7 @@ class InterfaceColContent extends Component {
         checkResponseField: {
           name: 'code',
           value: '0',
-          enable: false
+          enable: true
         },
         checkResponseSchema: false,
         checkScript:{
