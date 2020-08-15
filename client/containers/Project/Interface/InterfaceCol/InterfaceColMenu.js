@@ -711,6 +711,18 @@ export default class InterfaceColMenu extends Component {
       );
     };
     const colCreate = col => {
+
+      
+     
+
+      var typestr = "exclamation-circle";
+      var resultstr = "验证失败";
+      var resultcolor = "#ffbf00"
+      if(col.successnum == col.totalnum){
+        typestr = "check-circle";
+        resultstr = "通过";
+        resultcolor="#00a854"
+      }
       return (
         <TreeNode
           key={'col_' + col._id}
@@ -718,7 +730,17 @@ export default class InterfaceColMenu extends Component {
             <div className="menu-title">
               <span>
                 <Icon type="folder-open" style={{marginRight: 5}}/>
-                <span>{col.name}</span>
+                <span>{col.name} &nbsp;&nbsp;
+                    
+                      <Tooltip title={resultstr}>
+                        <Icon
+                          style={{
+                            color: resultcolor
+                          }}
+                          type={typestr}
+                        />
+                      </Tooltip>
+                </span>
               </span>
               <div className="btns">
                 <Tooltip title="删除集合">

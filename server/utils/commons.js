@@ -417,6 +417,54 @@ exports.translateDataToTree=(data,mynodeid)=> {
 }
 
 
+exports.getCol2 = async function getCol(project_id) {
+
+  const caseInst = yapi.getInst(interfaceCaseModel);
+  const colInst = yapi.getInst(interfaceColModel);
+  const interfaceInst = yapi.getInst(interfaceModel);
+ let result = await colInst.list(project_id);
+ result = result.sort((a, b) => {
+  // return a.index - b.index;
+  return  a.name.localeCompare(b.name) 
+ });
+
+
+ for (let i = 0; i < result.length; i++) {
+   result[i] = result[i].toObject();
+   result[i].parent_id=(typeof result[i].parent_id) == 'undefined'?-1: result[i].parent_id;
+   result[i].test_report = JSON.parse(result[i].test_report);
+
+   let caseList = await caseInst.list(result[i]._id);
+
+   // for(let j=0; j< caseList.length; j++){
+   //   let item = caseList[j].toObject();
+   //   let interfaceData = await interfaceInst.getBaseinfo(item.interface_id);
+   //   item.path = interfaceData.path;
+   //   caseList[j] = item;
+   //
+   // }
+
+   const interfaceDataList = await Promise.all(
+     caseList.map(item => interfaceInst.getBaseinfo(item.interface_id))
+   );
+   interfaceDataList.forEach((item, index) => {
+     caseList[index] = caseList[index].toObject();
+     caseList[index].path = item.path;
+   });
+
+   caseList = caseList.sort((a, b) => {
+     return a.index - b.index;
+   });
+   if(caseList&&caseList.length>0){
+     result[i].caseList = caseList;
+   }
+ }
+
+
+ return result;
+}
+
+
  exports.getCol = async function getCol(project_id,islist,mycatid) {
 
    const caseInst = yapi.getInst(interfaceCaseModel);
@@ -428,9 +476,18 @@ exports.translateDataToTree=(data,mynodeid)=> {
    return  a.name.localeCompare(b.name) 
   });
 
+ 
   for (let i = 0; i < result.length; i++) {
     result[i] = result[i].toObject();
     result[i].parent_id=(typeof result[i].parent_id) == 'undefined'?-1: result[i].parent_id;
+   
+    var reportList = JSON.parse(result[i].test_report);
+    result[i].test_report = null;
+
+    var totalnum = 0;
+    var successnum = 0;
+
+    
     let caseList = await caseInst.list(result[i]._id);
 
     // for(let j=0; j< caseList.length; j++){
@@ -455,7 +512,33 @@ exports.translateDataToTree=(data,mynodeid)=> {
     if(caseList&&caseList.length>0){
       result[i].caseList = caseList;
     }
+
+    caseList.map((item,index)=>{
+      var id = item._id;
+      var code  = 1;
+      try {
+          var item = reportList[id];
+          if(item){
+             code = item.code;
+          }
+          
+      } catch (e) {
+          console.log(e);
+      }
+
+      if(code == 0){
+        successnum ++;
+      }
+      totalnum++;
+    });
+    result[i].totalnum = totalnum;
+    result[i].successnum = successnum;
+
+   
+
   }
+
+ 
   result = islist ? result :  this.translateDataToTree(result,mycatid);
   return result;
 }

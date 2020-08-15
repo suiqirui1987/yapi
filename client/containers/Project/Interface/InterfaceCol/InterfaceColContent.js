@@ -1034,7 +1034,7 @@ class InterfaceColContent extends Component {
       location.hostname +
       (location.port !== '' ? ':' + location.port : '');
     let currColEnvObj = this.handleColEnvObj(this.state.currColEnvObj);
-    const autoTestsUrl = `/api/open/run_auto_batch_test?id=${this.props.currColId}&token=${
+    const autoTestsUrl = `/api/open/run_auto_test?id=${this.props.currColId}&token=${
       this.props.token
     }${currColEnvObj ? currColEnvObj : ''}&mode=${this.state.mode}&email=${
       this.state.email

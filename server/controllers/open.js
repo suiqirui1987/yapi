@@ -15,6 +15,8 @@ const {
 } = require('../../common/postmanLib');
 const { handleParamsValue, ArrayToObject } = require('../../common/utils.js');
 const renderToHtml = require('../utils/reportHtml');
+const batchToHtml = require('../utils/batchHtml')
+
 const HanldeImportData = require('../../common/HandleImportData');
 const _ = require('underscore');
 const createContex = require('../../common/createContext')
@@ -173,11 +175,15 @@ class openController extends baseController {
     return result;
   }
   
+
   async runcaseItemrun(ctx) {
     
   }
 
   async runAutoBatchTest(ctx) {
+
+  
+
     if (!this.$tokenAuth) {
       return (ctx.body = yapi.commons.resReturn(null, 40022, 'token 验证失败'));
     }
@@ -186,100 +192,23 @@ class openController extends baseController {
     const token = ctx.query.token;
 
     const projectId = ctx.params.project_id;
-    const startTime = new Date().getTime();
-    const testList = [];
-    const records = (this.records = {});
-    const reports = (this.reports = {});
+
+
+    
     let rootid = ctx.params.id;
     let curEnvList = this.handleEvnParams(ctx.params);
 
-    let colData = await yapi.commons.getCol(projectId,false, 0);
-    let colData2 = await yapi.commons.getCol(projectId,false,rootid);
-    let colids=[];
-    colids.push(colData2._id);
-    if(ctx.params.descendants|| ctx.params.descendants==='true') {
-      colids = colids.concat(colData2.descendants);
+    let colData = await yapi.commons.getCol2(projectId,true, 0);
+
+    var data = {
+      token:token,
+      projectId:projectId,
+      params:ctx.params
     }
-  
-    if (!colData2) {
-      return (ctx.body = yapi.commons.resReturn(null, 40022, 'id值不存在'));
-    }
-    let projectData = await this.projectModel.get(projectId);
-//--------------
-    for(let c=0;c<colids.length;c++){
-      let id=colids[c];
-      let caseList = await yapi.commons.getCaseList(id);
-      if (caseList.errcode !== 0) {
-        ctx.body = caseList;
-      }
-      caseList = caseList.data;
-      for (let i = 0, l = caseList.length; i < l; i++) {
+   
+    //return ctx.body = yapi.commons.resReturn(colData);
 
-        let item = caseList[i];
-        let curEnvItem = _.find(curEnvList, key => {
-          return key.project_id == item.project_id;
-        });
-        caseList[i].case_env="测试";
-       
-        let result = await this.caseItemrun(caseList[i], curEnvItem, projectData.pre_script,projectData.after_script,records,reports);
-       // console.log("result",result);
-
-
-        if(result.res_body.code != 0){
-          result.code = 1;
-        }
-
-        testList.push(result);
-      }
-    }
-//-----------------------
-    function getMessage(testList) {
-      let successNum = 0,
-        failedNum = 0,
-        len = 0,
-        msg = '';
-      testList.forEach(item => {
-        len++;
-        if (item.code === 0) {
-          successNum++;
-        }
-        else {
-          failedNum++;
-        }
-      });
-      if (failedNum === 0) {
-        msg = `一共 ${len} 测试用例，全部验证通过`;
-      } else {
-        msg = `一共 ${len} 测试用例，${successNum} 个验证通过， ${failedNum} 个未通过。`;
-      }
-
-      return { msg, len, successNum, failedNum };
-    }
-
-    const endTime = new Date().getTime();
-    const executionTime = (endTime - startTime) / 1000;
-
-    var coldata_list = [];
-    colData.map((item,index)=>{
-      var obj={}
-      obj.name = item.name;
-      obj.id = item._id;
-      obj.url = `${ctx.request.origin}/api/open/run_auto_batch_test?id=${obj.id}&token=${token}&mode=${ctx.params.mode}`;
-
-      coldata_list.push(obj);
-    })
-
-  //  console.log({testList});
-    let reportsResult = {
-      message: getMessage(testList),
-      runTime: executionTime + 's',
-      numbs: testList.length,
-      list: testList,
-      coldata_list:coldata_list,
-    };
-
-
-    return (ctx.body = renderToHtml(reportsResult));
+    return (ctx.body = batchToHtml(colData, data));
   }
 
   
