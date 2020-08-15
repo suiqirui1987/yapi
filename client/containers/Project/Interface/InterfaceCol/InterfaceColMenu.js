@@ -731,7 +731,6 @@ export default class InterfaceColMenu extends Component {
               <span>
                 <Icon type="folder-open" style={{marginRight: 5}}/>
                 <span>{col.name} &nbsp;&nbsp;
-                    
                       <Tooltip title={resultstr}>
                         <Icon
                           style={{
