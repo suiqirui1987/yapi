@@ -1,3 +1,7 @@
+/*
+ * @Date                : 2020-07-31 17:25:07
+ * @FilePath            : /yapi/.eslintrc.js
+ */
 module.exports = {
     env: {
         "browser": true,
@@ -20,7 +24,7 @@ module.exports = {
     rules: {
         "indent": ["off", 2],
         "react/display-name": ["off"],
-        "react/jsx-indent": ["error", 2],
+        //"react/jsx-indent": ["error", 2],
         "comma-dangle": ["error", "never"],
         "no-console": ["off"],
         "import/no-unresolved": ["off"],

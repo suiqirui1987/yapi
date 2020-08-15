@@ -730,16 +730,15 @@ export default class InterfaceColMenu extends Component {
             <div className="menu-title">
               <span>
                 <Icon type="folder-open" style={{marginRight: 5}}/>
-                <span>{col.name} &nbsp;&nbsp;
-                      <Tooltip title={resultstr}>
+                <span>{col.name}&nbsp;&nbsp;</span>
+                <Tooltip title={resultstr}>
                         <Icon
                           style={{
                             color: resultcolor
                           }}
                           type={typestr}
                         />
-                      </Tooltip>
-                </span>
+                </Tooltip>
               </span>
               <div className="btns">
                 <Tooltip title="删除集合">
